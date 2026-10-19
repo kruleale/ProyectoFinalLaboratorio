@@ -7,6 +7,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+
 public class GestorBD {
 
     public static final String HOST = "localhost";
@@ -57,6 +58,24 @@ public class GestorBD {
             }
         }
     }
-    
-    public static void insertarCliente(){}
+    public static void insertarCliente(String nombreUsuario, String clave) throws SQLException {
+        String sql = "INSERT INTO Usuarios (nombre_usuario, clave) VALUES (?, ?)";
+
+        try (Connection conexion = getConnection();
+             PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+
+            sentencia.setString(1, nombreUsuario);
+            sentencia.setString(2, clave);
+
+            sentencia.executeUpdate();
+
+        } catch (SQLException e) {
+            if (e.getErrorCode() == 1062) {
+                throw new SQLException("El nombre de usuario ya existe.", e);
+            }
+
+            throw e;
+        }
+    }
+
 }
