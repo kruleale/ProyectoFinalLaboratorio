@@ -5,7 +5,7 @@
 package com.mycompany.sistemaevaluadorcreditos;
 
 /**
- *
+ * santi papu
  * @author ale
  */
 public abstract class Cliente {
