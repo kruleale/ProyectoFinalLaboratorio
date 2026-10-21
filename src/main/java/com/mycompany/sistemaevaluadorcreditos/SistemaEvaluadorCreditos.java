@@ -12,5 +12,8 @@ public class SistemaEvaluadorCreditos {
 
     public static void main(String[] args) {
         System.out.println("Hello World!");
+         new VentanaLogin().setVisible(true);
     }
+    
+    
 }
