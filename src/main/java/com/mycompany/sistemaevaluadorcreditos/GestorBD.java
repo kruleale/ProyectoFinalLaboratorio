@@ -8,6 +8,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+
 public class GestorBD {
 
     public static final String HOST = "localhost";
@@ -50,6 +51,46 @@ public class GestorBD {
         throw new SQLException("No se pudo obtener el ID del cliente.");
     }
 
+    // Tabla hija de Empresa. Se asume: empresas(id_cliente, rubro, director)
+    public static void guardarEmpresa(int idCliente, String rubro, String director) throws SQLException {
+        String sql = "INSERT INTO empresas (id_cliente, rubro, director) VALUES (?, ?, ?)";
+
+        try (Connection conexion = getConnection();
+             PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+
+            sentencia.setInt(1, idCliente);
+            sentencia.setString(2, rubro);
+            sentencia.setString(3, director);
+
+            sentencia.executeUpdate();
+        }
+    }
+
+    // Para la pestaña "Base de datos". Se asume que clientes tiene la columna id.
+    public static List<Object[]> listarClientes() throws SQLException {
+        String sql = "SELECT id, nombre, ingresos, gastos FROM clientes";
+        List<Object[]> filas = new ArrayList<>();
+
+        try (Connection conexion = getConnection();
+             PreparedStatement sentencia = conexion.prepareStatement(sql);
+             ResultSet resultado = sentencia.executeQuery()) {
+
+            while (resultado.next()) {
+                filas.add(new Object[]{
+                    resultado.getInt("id"),
+                    resultado.getString("nombre"),
+                    resultado.getFloat("ingresos"),
+                    resultado.getFloat("gastos")
+                });
+            }
+        }
+
+        return filas;
+    }
+
+    public static boolean buscarCliente(String nombre, String contrasena) throws SQLException {
+        String sql = "SELECT * FROM clientes WHERE nombre = ? AND contrasena = ?";
+
     // ------------------------------------------------------------------
     // Usuarios
     // ------------------------------------------------------------------
@@ -57,6 +98,7 @@ public class GestorBD {
     /** Valida el login contra la tabla Usuarios. */
     public static boolean buscarCliente(String nombreUsuario, String clave) throws SQLException {
         String sql = "SELECT 1 FROM Usuarios WHERE nombre_usuario = ? AND clave = ?";
+     
 
         try (Connection conexion = getConnection();
              PreparedStatement sentencia = conexion.prepareStatement(sql)) {
@@ -88,6 +130,7 @@ public class GestorBD {
             throw e;
         }
     }
+
 
     /**
      * Devuelve todos los usuarios registrados, ordenados por id.
