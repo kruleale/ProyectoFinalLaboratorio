@@ -88,8 +88,7 @@ public class GestorBD {
         return filas;
     }
 
-    public static boolean buscarCliente(String nombre, String contrasena) throws SQLException {
-        String sql = "SELECT * FROM clientes WHERE nombre = ? AND contrasena = ?";
+    
 
     // ------------------------------------------------------------------
     // Usuarios

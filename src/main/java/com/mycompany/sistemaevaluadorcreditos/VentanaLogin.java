@@ -65,7 +65,7 @@ public class VentanaLogin extends JFrame {
  
             if (accesoConcedido) {
                 dispose();                           
-                //new VentanaPrincipal().setVisible(true);
+                new VentanaPrincipal().setVisible(true);
             } else {
                 JOptionPane.showMessageDialog(this,"Usuario o clave incorrectos.", "Acceso denegado",JOptionPane.WARNING_MESSAGE);
                 campoClave.setText("");

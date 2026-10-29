@@ -14,7 +14,6 @@ public class Empresa extends Cliente {
 
     @Override
     public void evaluarRiesgo() {
-        // Aquí se implementará la evaluación del riesgo.
     }
 
     public String getRubro() {
