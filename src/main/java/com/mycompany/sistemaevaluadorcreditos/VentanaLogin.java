@@ -26,6 +26,7 @@ public class VentanaLogin extends JFrame {
         setSize(380, 200);
         setDefaultCloseOperation(EXIT_ON_CLOSE);     // al cerrar, termina la app
         setResizable(false);
+        setLocationRelativeTo(null);
  
         // Grilla de 3 filas x 2 columnas: etiquetas a la izquierda, campos a llenar a la derecha
         JPanel panel = new JPanel(new GridLayout(3, 2, 10, 10));

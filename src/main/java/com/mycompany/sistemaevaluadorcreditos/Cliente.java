@@ -14,16 +14,20 @@ public abstract class Cliente {
     private String nombre;
     private float ingresos;
     private float gastos;
-    private boolean tieneBuenIngreso;
+    private boolean tieneBuenHistorial;
     
-    public Cliente(String nombre, float ingresos, float gastos, boolean tieneBuenIngreso) {
+    public Cliente(String nombre, float ingresos, float gastos, boolean tieneBuenHistorial) {
         this.nombre = nombre;
         this.ingresos = ingresos;
         this.gastos = gastos;
-        this.tieneBuenIngreso = tieneBuenIngreso;
+        this.tieneBuenHistorial = tieneBuenHistorial;
     }
     
-    public abstract void evaluarRiesgo();
+    public abstract double evaluarRiesgo();
+    
+    public boolean esApto() {
+        return evaluarRiesgo() > 0;
+    }
 
     public String getNombre() {
         return nombre;
@@ -37,8 +41,8 @@ public abstract class Cliente {
         return gastos;
     }
 
-    public boolean isTieneBuenIngreso() {
-        return tieneBuenIngreso;
+    public boolean isTieneBuenHistorial() {
+        return tieneBuenHistorial;
     }
 
     public void setNombre(String nombre) {
@@ -53,8 +57,8 @@ public abstract class Cliente {
         this.gastos = gastos;
     }
 
-    public void setTieneBuenIngreso(boolean tieneBuenIngreso) {
-        this.tieneBuenIngreso = tieneBuenIngreso;
+    public void setTieneBuenHistorial(boolean tieneBuenHistorial) {
+        this.tieneBuenHistorial = tieneBuenHistorial;
     }
     
     

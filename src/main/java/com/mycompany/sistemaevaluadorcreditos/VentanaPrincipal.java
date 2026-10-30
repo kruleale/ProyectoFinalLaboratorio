@@ -74,10 +74,20 @@ public class VentanaPrincipal extends JFrame {
 
     // Vista de base de datos
     private final DefaultTableModel modeloTabla = new DefaultTableModel(
-            new Object[]{"ID", "Nombre", "Ingresos", "Gastos"}, 0) {
+            new Object[]{"ID", "Tipo", "Nombre", "Ingresos", "Gastos", "Historial", "Rubro", "Director", "Evaluación"}, 0) {
         @Override
         public boolean isCellEditable(int fila, int columna) {
             return false;
+        }
+ 
+        @Override
+        public Class<?> getColumnClass(int columna) {
+            switch (columna) {
+                case 0: return Integer.class;
+                case 3:
+                case 4: return Float.class;      // ordena como número
+                default: return String.class;
+            }
         }
     };
     private final JTable tabla = new JTable(modeloTabla);
@@ -148,7 +158,6 @@ public class VentanaPrincipal extends JFrame {
     // Construcción de la interfaz
     // ------------------------------------------------------------------
 
-    /** Paso 2: barra de menú. Usa las mismas Actions que la barra de herramientas. */
     private JMenuBar crearBarraMenu() {
         JMenu menuArchivo = new JMenu("Archivo");
         menuArchivo.setMnemonic(KeyEvent.VK_A);
@@ -167,11 +176,7 @@ public class VentanaPrincipal extends JFrame {
         return barra;
     }
 
-    /**
-     * Paso 3: barra de herramientas. Solo texto (no depende de archivos de ícono).
-     * Orden: primero lo que se hace más seguido (guardar, refrescar) y, separado,
-     * la acción administrativa (usuarios).
-     */
+    //barra de herramientas
     private JToolBar crearBarraHerramientas() {
         JToolBar barra = new JToolBar();
         barra.setFloatable(false);
@@ -182,7 +187,7 @@ public class VentanaPrincipal extends JFrame {
         return barra;
     }
 
-    /** Paso 1: JTabbedPane con las dos vistas. */
+    //JTabbedPane con las dos vistas. 
     private JTabbedPane crearPestanas() {
         JTabbedPane pestanas = new JTabbedPane();
         pestanas.addTab("Nuevo análisis", crearPanelFormulario());
@@ -190,7 +195,7 @@ public class VentanaPrincipal extends JFrame {
         return pestanas;
     }
 
-    /** Paso 4: formulario de carga. */
+    //formulario de carga
     private JPanel crearPanelFormulario() {
         JPanel panel = new JPanel(new GridBagLayout());
         panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
@@ -256,7 +261,7 @@ public class VentanaPrincipal extends JFrame {
         return panel;
     }
 
-    /** Paso 5: barra de progreso inferior. */
+    //barra de progreso inferior. 
     private JProgressBar crearBarraProgreso() {
         barraProgreso.setStringPainted(true);
         barraProgreso.setString("Listo");
@@ -341,7 +346,6 @@ public class VentanaPrincipal extends JFrame {
         }.execute();
     }
 
-    /** Paso 6: recolecta datos, arma el Cliente, lo persiste y guarda la tabla hija si corresponde. */
     private void guardarCliente() {
         // Confirma lo que el usuario haya tipeado en los spinners
         try {
@@ -374,20 +378,24 @@ public class VentanaPrincipal extends JFrame {
         float gastos = ((Number) spinnerGastos.getValue()).floatValue();
         boolean historial = checkHistorial.isSelected();
 
-        // Instancia según el tipo seleccionado
+        // instancia segun el tipo seleccionado
         final Cliente cliente = esEmpresa
                 ? new Empresa(nombre, ingresos, gastos, historial, rubro, director)
                 : new Personas_fis(nombre, ingresos, gastos, historial);
 
-        ejecutarConProgreso(() -> {
-            int id = GestorBD.guardarCliente(cliente);   // id autogenerado
-            if (cliente instanceof Empresa) {
+            ejecutarConProgreso(() -> {
+            int id = GestorBD.guardarCliente(cliente);   // 1) guarda en Clientes, devuelve el id
+            if (cliente instanceof Empresa) {             // 2) después, la tabla hija según el tipo
                 Empresa emp = (Empresa) cliente;
                 GestorBD.guardarEmpresa(id, emp.getRubro(), emp.getDirector());
+            } else {
+                GestorBD.guardarPersonaFisica(id);
             }
             return id;
         }, id -> {
-            JOptionPane.showMessageDialog(this, "Cliente guardado (ID " + id + ").",
+            JOptionPane.showMessageDialog(this,
+                    "Cliente guardado (ID " + id + ").\nEvaluación: "
+                    + (cliente.esApto() ? "APTO para el préstamo" : "NO APTO para el préstamo"),
                     "Guardado", JOptionPane.INFORMATION_MESSAGE);
             limpiarFormulario();
             refrescarListado();
@@ -403,19 +411,9 @@ public class VentanaPrincipal extends JFrame {
         });
     }
 
-    /**
-     * Paso 7: acceso a la gestión de usuarios (menú y barra apuntan a esta acción).
-     * Cuando exista VentanaUsuarios, solo hay que reemplazar el cuerpo del callback.
-     */
-    private void abrirVentanaUsuarios() {
-        ejecutarConProgreso(() -> {
-            // TODO: acá va cualquier carga contra la BD que necesite la ventana de usuarios
-            return null;
-        }, resultado -> {
-            // TODO: new VentanaUsuarios().setVisible(true);
-            JOptionPane.showMessageDialog(this,
-                    "La ventana de gestión de usuarios todavía no está construida.",
-                    "Pendiente", JOptionPane.INFORMATION_MESSAGE);
-        });
+    //acceso a gestion de usuarios
+   private void abrirVentanaUsuarios() {
+        ejecutarConProgreso(GestorBD::listarUsuarios,
+                usuarios -> new VentanaUsuarios(usuarios).setVisible(true));
     }
 }

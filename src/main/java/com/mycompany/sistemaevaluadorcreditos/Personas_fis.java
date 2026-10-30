@@ -10,14 +10,20 @@ package com.mycompany.sistemaevaluadorcreditos;
  */ 
     
 public class Personas_fis extends Cliente {
+    
+    public static final double UMBRAL_MARGEN = 0.30;
 
     public Personas_fis(String nombre, float ingresos, float gastos, boolean tieneBuenIngreso) {
         super(nombre, ingresos, gastos, tieneBuenIngreso);
     }
 
     @Override
-    public void evaluarRiesgo() {
-        // Aquí se implementará la evaluación del riesgo.
+    public double evaluarRiesgo() {
+        if (!isTieneBuenHistorial()) {
+            return 0.0;                                   // sin buen historial: no apto
+        }
+        double margen = getIngresos() - getGastos();
+        return margen >= getIngresos() * UMBRAL_MARGEN ? 1.0 : 0.0;
     }
 }
     

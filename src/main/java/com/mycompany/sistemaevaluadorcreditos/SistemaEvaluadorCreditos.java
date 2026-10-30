@@ -11,8 +11,7 @@ package com.mycompany.sistemaevaluadorcreditos;
 public class SistemaEvaluadorCreditos {
 
     public static void main(String[] args) {
-        System.out.println("Hello World!");
-         new VentanaLogin().setVisible(true);
+         javax.swing.SwingUtilities.invokeLater(() -> new VentanaLogin().setVisible(true));
     }
     
     

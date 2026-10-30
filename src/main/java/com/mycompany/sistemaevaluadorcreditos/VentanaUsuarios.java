@@ -127,6 +127,7 @@ public class VentanaUsuarios extends JFrame {
 
         JSplitPane divisor = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
                 crearPanelFormulario(), crearPanelListado());
+        divisor.setOneTouchExpandable(true);
         divisor.setDividerLocation(250);
         divisor.setResizeWeight(0.0);       // al agrandar la ventana crece el listado
 
@@ -193,7 +194,11 @@ public class VentanaUsuarios extends JFrame {
         panel.add(new JPanel(), gbc);
 
         // Enter en la clave = Crear usuario
-        campoClave.addActionListener(e -> accionCrear.actionPerformed(e));
+        campoClave.addActionListener(e -> {
+            if (accionCrear.isEnabled()) {       // no permitir alta mientras hay una operación en curso
+                accionCrear.actionPerformed(e);
+            }
+        });
 
         return panel;
     }
@@ -276,11 +281,11 @@ public class VentanaUsuarios extends JFrame {
     private void actualizarEstadoAcciones() {
         accionCrear.setEnabled(!ocupado);
         accionRefrescar.setEnabled(!ocupado);
-        accionEliminar.setEnabled(!ocupado && tablaUsuarios.getSelectedRow() >= 0);
+        accionEliminar.setEnabled(!ocupado);
     }
 
     /**
-     * Ejecuta una tarea (normalmente contra la BD) en un hilo aparte, con la
+     * Ejecuta una tarea en un hilo aparte, con la
      * barra en modo indeterminado mientras dura. Al terminar la barra vuelve a
      * su estado normal y se ejecuta alTerminar en el hilo de Swing.
      */
@@ -381,4 +386,3 @@ public class VentanaUsuarios extends JFrame {
     }
 } 
 
-/*HOLA */

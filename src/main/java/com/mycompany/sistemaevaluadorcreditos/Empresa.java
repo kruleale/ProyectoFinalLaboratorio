@@ -1,6 +1,9 @@
 package com.mycompany.sistemaevaluadorcreditos;
 
 public class Empresa extends Cliente {
+    
+    
+    public static final double UMBRAL_RATIO = 1.5;
 
     private String rubro;
     private String director;
@@ -13,7 +16,14 @@ public class Empresa extends Cliente {
     }
 
     @Override
-    public void evaluarRiesgo() {
+    public double evaluarRiesgo() {
+        double ratio;
+        if (getGastos() == 0) {                           // evita dividir por cero
+            ratio = getIngresos() > 0 ? Double.POSITIVE_INFINITY : 0.0;
+        } else {
+            ratio = getIngresos() / getGastos();
+        }
+        return ratio >= UMBRAL_RATIO ? 1.0 : 0.0;
     }
 
     public String getRubro() {

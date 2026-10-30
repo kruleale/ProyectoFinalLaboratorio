@@ -27,10 +27,9 @@ public class GestorBD {
     // ------------------------------------------------------------------
 
     public static int guardarCliente(Cliente cliente) throws SQLException {
-        String sql = "INSERT INTO Clientes (nombre, ingresos, gastos) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO Clientes (nombre, ingresos, gastos,historial) VALUES (?, ?, ?,?)";
 
-        // try-with-resources: Connection, PreparedStatement y ResultSet se cierran
-        // automáticamente al salir del bloque, haya o no excepción.
+       
         try (Connection conexion = getConnection();
              PreparedStatement sentencia = conexion.prepareStatement(
                      sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
@@ -38,6 +37,7 @@ public class GestorBD {
             sentencia.setString(1, cliente.getNombre());
             sentencia.setFloat(2, cliente.getIngresos());
             sentencia.setFloat(3, cliente.getGastos());
+            sentencia.setString(4, cliente.isTieneBuenHistorial() ? "BUENO" : "MALO");
 
             sentencia.executeUpdate();
 
@@ -50,10 +50,21 @@ public class GestorBD {
 
         throw new SQLException("No se pudo obtener el ID del cliente.");
     }
+    
+    public static void guardarPersonaFisica(int idCliente) throws SQLException {
+        String sql = "INSERT INTO Personas_fis (id_cliente) VALUES (?)";
+ 
+        try (Connection conexion = getConnection();
+             PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+ 
+            sentencia.setInt(1, idCliente);
+            sentencia.executeUpdate();
+        }
+    }
 
     // Tabla hija de Empresa. Se asume: empresas(id_cliente, rubro, director)
     public static void guardarEmpresa(int idCliente, String rubro, String director) throws SQLException {
-        String sql = "INSERT INTO empresas (id_cliente, rubro, director) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO Empresas (id_cliente, rubro, director) VALUES (?, ?, ?)";
 
         try (Connection conexion = getConnection();
              PreparedStatement sentencia = conexion.prepareStatement(sql)) {
@@ -66,9 +77,11 @@ public class GestorBD {
         }
     }
 
-    // Para la pestaña "Base de datos". Se asume que clientes tiene la columna id.
-    public static List<Object[]> listarClientes() throws SQLException {
-        String sql = "SELECT id, nombre, ingresos, gastos FROM clientes";
+        public static List<Object[]> listarClientes() throws SQLException {
+        String sql = "SELECT c.id_cliente, c.nombre, c.ingresos, c.gastos, c.historial, "
+                   + "e.id_empresa, e.rubro, e.director "
+                   + "FROM Clientes c LEFT JOIN Empresas e ON e.id_cliente = c.id_cliente "
+                   + "ORDER BY c.id_cliente";
         List<Object[]> filas = new ArrayList<>();
 
         try (Connection conexion = getConnection();
@@ -76,15 +89,30 @@ public class GestorBD {
              ResultSet resultado = sentencia.executeQuery()) {
 
             while (resultado.next()) {
+                boolean esEmpresa = resultado.getObject("id_empresa") != null;
+                String nombre = resultado.getString("nombre");
+                float ingresos = resultado.getFloat("ingresos");
+                float gastos = resultado.getFloat("gastos");
+                String historial = resultado.getString("historial");
+                String rubro = resultado.getString("rubro");
+                String director = resultado.getString("director");
+                boolean bueno = "BUENO".equalsIgnoreCase(historial);
+
+                Cliente c = esEmpresa
+                        ? new Empresa(nombre, ingresos, gastos, bueno, rubro, director)
+                        : new Personas_fis(nombre, ingresos, gastos, bueno);
+
                 filas.add(new Object[]{
-                    resultado.getInt("id"),
-                    resultado.getString("nombre"),
-                    resultado.getFloat("ingresos"),
-                    resultado.getFloat("gastos")
+                    resultado.getInt("id_cliente"),
+                    esEmpresa ? "Empresa" : "Persona Física",
+                    nombre, ingresos, gastos,
+                    historial == null ? "-" : historial,
+                    rubro == null ? "" : rubro,
+                    director == null ? "" : director,
+                    c.esApto() ? "APTO" : "NO APTO"
                 });
             }
         }
-
         return filas;
     }
 
