@@ -22,6 +22,9 @@ public class Personas_fis extends Cliente {
         if (!isTieneBuenHistorial()) {
             return 0.0;                                   // sin buen historial: no apto
         }
+        if (getIngresos() <= 0) {
+            return 0.0;                                   // sin ingresos: no apto
+        }
         double margen = getIngresos() - getGastos();
         return margen >= getIngresos() * UMBRAL_MARGEN ? 1.0 : 0.0;
     }
